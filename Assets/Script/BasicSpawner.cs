@@ -68,10 +68,10 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
                 player,
                 (runner, obj) =>
                 {
-                    PlayerRoles role = obj.GetComponent<PlayerRoles>();
-                    if (role != null)
+                    Player playerComponent = obj.GetComponent<Player>();
+                    if (playerComponent != null)
                     {
-                        role.Role = assignedRole;
+                        playerComponent.Role = assignedRole;
                     }
                 }
             );
@@ -147,6 +147,22 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             Vector3 pos = _robberSpawnPoint[_robberSpawnCount % _robberSpawnPoint.Length].position;
             _robberSpawnCount++;
             return pos;
+        }
+    }
+
+    private void OnGUI()
+    {
+        if(_runner == null)
+        {
+            if (GUI.Button(new Rect(10, 10, 200, 40), "规 积己"))
+            {
+                StartGame(GameMode.Host);
+            }
+
+            if (GUI.Button(new Rect(10, 60, 200, 40), "规 曼啊"))
+            {
+                StartGame(GameMode.Client);
+            }
         }
     }
 }

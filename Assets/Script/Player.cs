@@ -4,20 +4,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 
+public enum PlayerRole
+{
+    Cop, Robber
+}
+
 public class Player : NetworkBehaviour      
 {
     [SerializeField] private CinemachineFreeLook _freeLookCamera;
-    [SerializeField] private Transform _cameraRoot;
 
-    [Networked] private float AnimSpeed { get; set; }               
+    [Networked] public PlayerRole Role { get; set; }
+    [Networked] private float AnimSpeed { get; set; }
+    private TickTimer _catchCooldown { get; set; }
 
     private ChangeDetector _change;
     private Renderer _renderer;
     private Animator _animator;
-    private PlayerRoles _role;
-
-    private Vector3 _spawnPoint;
-    private Color PlayerColor;
 
     private NetworkCharacterController _cc;
 
@@ -26,41 +28,40 @@ public class Player : NetworkBehaviour
         _cc = GetComponent<NetworkCharacterController>(); 
         _renderer = GetComponentInChildren<Renderer>();
         _animator = GetComponentInChildren<Animator>();
-        _role = GetComponent<PlayerRoles>();
-        _change = GetChangeDetector(ChangeDetector.Source.SimulationState);
     }
 
     public override void Spawned()
     {
-        if(_role.Role == PlayerRole.Robber)
+        _change = GetChangeDetector(ChangeDetector.Source.SimulationState);
+
+        if (Role == PlayerRole.Robber)
         {
             _cc.maxSpeed = 6.0f;
         }
-        else if(_role.Role == PlayerRole.Cop)
+        else if(Role == PlayerRole.Cop)
         {
             _cc.maxSpeed = 4.0f;
         }
+
+        UpdateColor();
+
+        if (HasInputAuthority)
+        {
+            _freeLookCamera.gameObject.SetActive(true);
+        }
+        else
+        {
+            _freeLookCamera.gameObject.SetActive(false);
+        }
     }
 
-    /*public override void Render()   //눈에 보이는 것은 Render()나 Update()에서
+    public override void Render()
     {
         foreach(var change in _change.DetectChanges(this))
         {
             switch (change)
             {
-                case nameof(CurrentHp):
-                    healthBar.UpdateHealth(CurrentHp, MaxHp);
-                    break;
-
-                case nameof(IsDead):
-                    UpdateColor();
-                    break;
-
-                case nameof(Score):
-                    PlayerScoreEffect();
-                    break;
-
-                case nameof(CanInput):
+                case nameof(Role):
                     UpdateColor();
                     break;
             }
@@ -85,24 +86,29 @@ public class Player : NetworkBehaviour
                 _animator.SetBool("Jump", false);
             }
         }
-    }*/
+    }
 
-    public override void FixedUpdateNetwork()   //로직 계산은 여기서
+    public override void FixedUpdateNetwork()
     {
         if (GetInput(out NetworkInputData data))
         {
+            if (HasStateAuthority)
+            {
+                AnimSpeed = data.direction.magnitude;
+            }
+
             Vector3 moveDirection = Quaternion.Euler(0, data.cameraYaw, 0) * new Vector3(data.direction.x, 0, data.direction.y);
             moveDirection.Normalize();
 
-            if(moveDirection.sqrMagnitude > 0)
+            if (moveDirection.sqrMagnitude > 0)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Runner.DeltaTime * 10f);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Runner.DeltaTime * 15f);
             }
 
             _cc.Move(moveDirection);
 
-            if(data.button.Equals(0))
+            if(data.button.IsSet(0))
             {
                 _cc.Jump();
             }
@@ -113,7 +119,37 @@ public class Player : NetworkBehaviour
     {
         if(_renderer != null)
         {
+            if(Role == PlayerRole.Cop)
+            {
+                _renderer.material.color = Color.blue;
+            }
+            else if(Role == PlayerRole.Robber)
+            {
+                _renderer.material.color = Color.red;
+            }
+        }
+    }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (HasStateAuthority)
+        {
+            if (Role == PlayerRole.Cop)
+            {
+                if(_catchCooldown.ExpiredOrNotRunning(Runner) == false)
+                {
+                    return;
+                }
+
+                Player target = other.GetComponentInParent<Player>();
+
+                if(target != null && target != this && target.Role == PlayerRole.Robber)
+                {
+                    Debug.Log("Robber Caught!");
+
+                    _catchCooldown = TickTimer.CreateFromSeconds(Runner, 3.0f);
+                }
+            }
         }
     }
 }
