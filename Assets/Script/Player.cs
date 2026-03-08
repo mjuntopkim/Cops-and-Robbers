@@ -97,13 +97,13 @@ public class Player : NetworkBehaviour
                 AnimSpeed = data.direction.magnitude;
             }
 
-            Vector3 moveDirection = Quaternion.Euler(0, data.cameraYaw, 0) * new Vector3(data.direction.x, 0, data.direction.y);
+            Vector3 moveDirection = Quaternion.Euler(0, data.cameraYaw, 0) * data.direction;
             moveDirection.Normalize();
 
             if (moveDirection.sqrMagnitude > 0)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Runner.DeltaTime * 15f);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Runner.DeltaTime * 20f);
             }
 
             _cc.Move(moveDirection);
