@@ -43,7 +43,7 @@ public class Player : NetworkBehaviour
             _cc.maxSpeed = 4.0f;
         }
 
-        UpdateColor();
+        //UpdateColor();
 
         if (HasInputAuthority)
         {
@@ -62,7 +62,7 @@ public class Player : NetworkBehaviour
             switch (change)
             {
                 case nameof(Role):
-                    UpdateColor();
+                    //UpdateColor();
                     break;
             }
         }
@@ -115,7 +115,7 @@ public class Player : NetworkBehaviour
         }
     }
 
-    private void UpdateColor()
+    /*private void UpdateColor()
     {
         if(_renderer != null)
         {
@@ -128,7 +128,7 @@ public class Player : NetworkBehaviour
                 _renderer.material.color = Color.red;
             }
         }
-    }
+    }*/
 
     private void OnTriggerEnter(Collider other)
     {
