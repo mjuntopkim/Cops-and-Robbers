@@ -19,6 +19,24 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     private int _copSpawnCount = 0;
     private int _robberSpawnCount = 0;
 
+    public void Start()
+    {
+        var _runner = FindObjectOfType<NetworkRunner>();
+        if(_runner != null)
+        {
+            _runner.AddCallbacks(this);
+        }
+    }
+
+    public void OnDestroy()
+    {
+        var _runner = FindObjectOfType<NetworkRunner>();
+        if(_runner != null)
+        {
+            _runner.RemoveCallbacks(this);
+        }
+    }
+
     public void OnConnectedToServer(NetworkRunner runner) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
@@ -100,40 +118,6 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
 
-    async void StartGame(GameMode mode)
-    {
-        _runner = gameObject.AddComponent<NetworkRunner>();
-
-        // _runner가 로컬 사용자의 입력을 받을 것 인지 설정, true로 해야 키보드로 입력한 정보가 서버로 전송됨
-        _runner.ProvideInput = true;
-
-        // 현재 열려있는 씬의 번호(index)를 가져옴
-        var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
-        var sceneInfo = new NetworkSceneInfo();
-
-        // 가져온 씬이 유효하면 네트워크 씬 정보에 등록 (나중에 접속하는 사람들에게 알려주기 위함)
-        if (scene.IsValid)
-        {
-            sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
-        }
-
-        // 이 설정으로 게임 접속 시도, 될 때까지 기다림
-        await _runner.StartGame(new StartGameArgs()
-        {
-            // 내가 호스트인지 클라이언트인지
-            GameMode = mode,
-
-            //방 이름
-            SessionName = "TestRoom",
-
-            // 위에서 저장한 씬 정보
-            Scene = scene,
-
-            // Fusion이 씬을 로드할때 이 컴포넌트에 씬을 불러오라고 시킴
-            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
-        });
-    }
-
     private Vector3 GetSpawnPosition(PlayerRole role)
     {
         if(role == PlayerRole.Cop)
@@ -147,22 +131,6 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             Vector3 pos = _robberSpawnPoint[_robberSpawnCount % _robberSpawnPoint.Length].position;
             _robberSpawnCount++;
             return pos;
-        }
-    }
-
-    private void OnGUI()
-    {
-        if(_runner == null)
-        {
-            if (GUI.Button(new Rect(10, 10, 200, 40), "방 생성"))
-            {
-                StartGame(GameMode.Host);
-            }
-
-            if (GUI.Button(new Rect(10, 60, 200, 40), "방 참가"))
-            {
-                StartGame(GameMode.Client);
-            }
         }
     }
 }
