@@ -4,11 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 
-public enum PlayerRole
-{
-    Cop, Robber
-}
-
 public class Player : NetworkBehaviour      
 {
     [SerializeField] private CinemachineFreeLook _freeLookCamera;

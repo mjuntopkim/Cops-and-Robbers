@@ -5,14 +5,21 @@ using Fusion;
 using Fusion.Sockets;
 using UnityEngine.SceneManagement;
 using System;
+using UnityEngine.UI;
 
-public class MainMenuManager : MonoBehaviour
+public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private GameObject mainPanel;
     [SerializeField] private GameObject joinPanel;
 
-    public NetworkRunner networkRunnerPrefab;
-    private NetworkRunner currentRunner;
+    [SerializeField] private Transform sessionListCenter;
+    [SerializeField] private GameObject roomListItemPrefab;
+    [SerializeField] private Button joinButton;
+
+    [SerializeField]private NetworkRunner networkRunnerPrefab;
+
+    private NetworkRunner _runner;
+    private string _selectedRoomname = "";
 
     public void OnClickExitButton()
     {
@@ -22,50 +29,63 @@ public class MainMenuManager : MonoBehaviour
 
     public async void OnClickhostButton()
     {
-        currentRunner = Instantiate(networkRunnerPrefab);
-        currentRunner.name = "Network Runner";
+        _runner = Instantiate(networkRunnerPrefab);
+        _runner.name = "Network Runner";
+        _runner.AddCallbacks(this);
 
-        var sceneManager = currentRunner.gameObject.AddComponent<NetworkSceneManagerDefault>();
+        var sceneManager = _runner.gameObject.AddComponent<NetworkSceneManagerDefault>();
+
+        var customProps = new Dictionary<string, SessionProperty>();
+        customProps.Add("RoomTitle", "Host's GameRoom");
 
         var startGameArgs = new StartGameArgs()
         {
             GameMode = GameMode.Host,
-            SessionName = "Game Room",
+            SessionName = System.Guid.NewGuid().ToString(),
+            SessionProperties = customProps,
+            PlayerCount = 6,
+            IsVisible = true,
+            IsOpen = true,
             Scene = SceneRef.FromIndex(1),
             SceneManager = sceneManager
         };
 
-        await currentRunner.StartGame(startGameArgs);
+        await _runner.StartGame(startGameArgs);
     }
 
     public async void OnClickJoinMenuButton()
     {
         mainPanel.SetActive(false);
         joinPanel.SetActive(true);
+        joinButton.interactable = false;
 
-        if(currentRunner == null)
+        if (_runner == null)
         {
-            currentRunner = Instantiate(networkRunnerPrefab);
-            currentRunner.name = "Network Runner";
+            _runner = Instantiate(networkRunnerPrefab);
+            _runner.AddCallbacks(this);
         }
 
-        await currentRunner.JoinSessionLobby(SessionLobby.ClientServer);
+        if (!_runner.LobbyInfo.IsValid)
+        {
+            await _runner.JoinSessionLobby(SessionLobby.ClientServer);
+        }
     }
 
-    public async void OnClickQuickJoinButton()
+    /*public async void OnClickQuickJoinButton()
     {
 
-    }
+    }*/
 
     public void OnClickBackButton()
     {
         joinPanel.SetActive(false);
         mainPanel.SetActive(true);
+        joinButton.interactable = false;
     }
 
-    public async void JoinRoom(string roomName)
+    public async void OnClickJoinRoomButton(string roomName)
     {
-        var sceneManager = currentRunner.gameObject.GetComponent<NetworkSceneManagerDefault>();
+        var sceneManager = _runner.gameObject.GetComponent<NetworkSceneManagerDefault>();
 
         var startGameArgs = new StartGameArgs()
         {
@@ -74,11 +94,56 @@ public class MainMenuManager : MonoBehaviour
             SceneManager = sceneManager
         };
 
-        await currentRunner.StartGame(startGameArgs);
+        await _runner.StartGame(startGameArgs);
     }
 
-    public void OnSessionListUpdate(NetworkRunner runner, List<SessionInfo> sessionList)
+    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
     {
+        foreach(Transform child in sessionListCenter)
+        {
+            Destroy(child.gameObject);
+        }
 
+        foreach(var session in sessionList)
+        {
+            if(!session.IsOpen || !session.IsVisible)
+            {
+                continue;
+            }
+            Debug.Log("Àß ½ÇÇàµÊ");
+
+            GameObject item = Instantiate(roomListItemPrefab, sessionListCenter, false);
+            RoomListItem itemScript = item.GetComponent<RoomListItem>();
+
+            itemScript.Setup(session, this);
+        }
+
+        _selectedRoomname = "";
+        joinButton.interactable = false;
     }
+
+    public void OnRoomSelected(string roomName)
+    {
+        _selectedRoomname = roomName;
+        joinButton.interactable = true;
+    }
+
+    public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
+    public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
+    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) { }
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
+    public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
+    public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
+    public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
+    public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
+    public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
+    public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
+    public void OnInput(NetworkRunner runner, NetworkInput input) { }
+    public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
+    public void OnConnectedToServer(NetworkRunner runner) { }
+    public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
+    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
+    public void OnSceneLoadDone(NetworkRunner runner) { }
+    public void OnSceneLoadStart(NetworkRunner runner) { }
 }
