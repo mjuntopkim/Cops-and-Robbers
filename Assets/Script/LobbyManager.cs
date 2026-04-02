@@ -9,10 +9,7 @@ public class LobbyManager : MonoBehaviour
 {
     [SerializeField] private Button readyButton;
     [SerializeField] private Button startButton;
-    private TextMeshProUGUI roomName;
-
-    [SerializeField] private TMP_InputField roomNameInputField;
-    [SerializeField] private Button changeRoomNameButton;
+    [SerializeField] private TextMeshProUGUI roomName;
 
     private NetworkRunner _runner;
     private LobbyPlayer _lobbyPlayer;
@@ -24,22 +21,18 @@ public class LobbyManager : MonoBehaviour
         
         if(_runner != null)
         {
+            UpdateRoomNameDisplay();
+
             if (_runner.IsServer)
             {
                 readyButton.gameObject.SetActive(false);
                 startButton.gameObject.SetActive(true);
                 startButton.interactable = false;
-
-                roomNameInputField.gameObject.SetActive(true);
-                changeRoomNameButton.gameObject.SetActive(true);
             }
             else
             {
                 readyButton.gameObject.SetActive(true);
                 startButton.gameObject.SetActive(false);
-
-                roomNameInputField.gameObject.SetActive(false);
-                changeRoomNameButton.gameObject.SetActive(false);
             }
         }
     }
@@ -47,7 +40,6 @@ public class LobbyManager : MonoBehaviour
     private void Update()
     {
         CheckPlayerReady();
-        UpdateRoomNameDisplay();
     }
 
     private void CheckPlayerReady()
@@ -63,7 +55,7 @@ public class LobbyManager : MonoBehaviour
         bool allReady = true;
         foreach(var player in allPlayer)
         {
-            if(!player.HasStateAuthority && !player.IsReady)
+            if(!player.HasInputAuthority && !player.IsReady)
             {
                 allReady = false;
                 break;
@@ -84,22 +76,6 @@ public class LobbyManager : MonoBehaviour
                     _currentRoomTitle = (string)titleProp;
                     roomName.text = _currentRoomTitle;
                 }
-            }
-        }
-    }
-
-    public void OnClickChangeRoomNameButton()
-    {
-        if(_runner != null && _runner.IsServer)
-        {
-            string newName = roomNameInputField.text;
-
-            if (!string.IsNullOrEmpty(newName))
-            {
-                var newProps = new Dictionary<string, SessionProperty>();
-                newProps.Add("RoomTitle", newName);
-
-                _runner.SessionInfo.UpdateCustomProperties(newProps);
             }
         }
     }

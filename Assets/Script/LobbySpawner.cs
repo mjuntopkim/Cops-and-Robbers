@@ -33,7 +33,16 @@ public class LobbySpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (runner.IsServer)
         {
-            runner.Spawn(lobbyPlayerPrefab, Vector3.zero, Quaternion.identity, player);
+            runner.Spawn(
+                lobbyPlayerPrefab,
+                Vector3.zero,
+                Quaternion.identity,
+                player,
+                (runner, obj) =>
+                {
+                    LobbyPlayer spawnplayer = obj.GetComponent<LobbyPlayer>();
+                    spawnplayer.IsReady = false;
+            });
         }
     }
 

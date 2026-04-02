@@ -6,11 +6,14 @@ using Fusion.Sockets;
 using UnityEngine.SceneManagement;
 using System;
 using UnityEngine.UI;
+using TMPro;
 
 public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private GameObject mainPanel;
     [SerializeField] private GameObject joinPanel;
+    [SerializeField] private GameObject hostPanael;
+    [SerializeField] private TMP_InputField roomNameInputField;
 
     [SerializeField] private Transform sessionListCenter;
     [SerializeField] private GameObject roomListItemPrefab;
@@ -27,8 +30,16 @@ public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
         Application.Quit();
     }
 
-    public async void OnClickhostButton()
+    public void OnClickhostButton()
     {
+        mainPanel.gameObject.SetActive(false);
+        hostPanael.gameObject.SetActive(true);
+    }
+
+    public async void OnClickCreateRoomButton()
+    {
+        string newName = roomNameInputField.text;
+
         _runner = Instantiate(networkRunnerPrefab);
         _runner.name = "Network Runner";
         _runner.AddCallbacks(this);
@@ -36,7 +47,7 @@ public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
         var sceneManager = _runner.gameObject.AddComponent<NetworkSceneManagerDefault>();
 
         var customProps = new Dictionary<string, SessionProperty>();
-        customProps.Add("RoomTitle", "Host's GameRoom");
+        customProps.Add("RoomTitle", newName);
 
         var startGameArgs = new StartGameArgs()
         {
@@ -80,6 +91,7 @@ public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
     {
         joinPanel.SetActive(false);
         mainPanel.SetActive(true);
+        hostPanael.SetActive(false);
         joinButton.interactable = false;
     }
 
@@ -104,7 +116,7 @@ public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
             Destroy(child.gameObject);
         }
 
-        foreach(var session in sessionList)
+        foreach (var session in sessionList)
         {
             if(!session.IsOpen || !session.IsVisible)
             {
