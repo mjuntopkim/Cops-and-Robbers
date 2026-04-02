@@ -40,9 +40,14 @@ public class LobbySpawner : MonoBehaviour, INetworkRunnerCallbacks
                 player,
                 (runner, obj) =>
                 {
-                    LobbyPlayer spawnplayer = obj.GetComponent<LobbyPlayer>();
-                    spawnplayer.IsReady = false;
-            });
+                    LobbyPlayer spawnedPlayer = obj.GetComponent<LobbyPlayer>();
+                    if (spawnedPlayer != null)
+                    {
+                        spawnedPlayer.IsReady = false;
+                        spawnedPlayer.Role = PlayerRole.Cop;
+                        spawnedPlayer.IsHost = (player == runner.LocalPlayer);
+                    }
+                });
         }
     }
 

@@ -7,8 +7,6 @@ using Cinemachine;
 public class Player : NetworkBehaviour      
 {
     [SerializeField] private CinemachineFreeLook _freeLookCamera;
-
-    [Networked] public PlayerRole Role { get; set; }
     [Networked] private float AnimSpeed { get; set; }
     private TickTimer _catchCooldown { get; set; }
 
@@ -27,18 +25,18 @@ public class Player : NetworkBehaviour
 
     public override void Spawned()
     {
+        LobbyPlayer lobbyPlayer = FindObjectOfType<LobbyPlayer>();
+
         _change = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
-        if (Role == PlayerRole.Robber)
+        if (lobbyPlayer.Role == PlayerRole.Robber)
         {
             _cc.maxSpeed = 6.0f;
         }
-        else if(Role == PlayerRole.Cop)
+        else if(lobbyPlayer.Role == PlayerRole.Cop)
         {
             _cc.maxSpeed = 4.0f;
         }
-
-        //UpdateColor();
 
         if (HasInputAuthority)
         {
@@ -52,16 +50,6 @@ public class Player : NetworkBehaviour
 
     public override void Render()
     {
-        foreach(var change in _change.DetectChanges(this))
-        {
-            switch (change)
-            {
-                case nameof(Role):
-                    //UpdateColor();
-                    break;
-            }
-        }
-
         if (_animator != null)
         {
             _animator.SetFloat("Speed", AnimSpeed);
@@ -106,44 +94,6 @@ public class Player : NetworkBehaviour
             if(data.button.IsSet(0))
             {
                 _cc.Jump();
-            }
-        }
-    }
-
-    /*private void UpdateColor()
-    {
-        if(_renderer != null)
-        {
-            if(Role == PlayerRole.Cop)
-            {
-                _renderer.material.color = Color.blue;
-            }
-            else if(Role == PlayerRole.Robber)
-            {
-                _renderer.material.color = Color.red;
-            }
-        }
-    }*/
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (HasStateAuthority)
-        {
-            if (Role == PlayerRole.Cop)
-            {
-                if(_catchCooldown.ExpiredOrNotRunning(Runner) == false)
-                {
-                    return;
-                }
-
-                Player target = other.GetComponentInParent<Player>();
-
-                if(target != null && target != this && target.Role == PlayerRole.Robber)
-                {
-                    Debug.Log("Robber Caught!");
-
-                    _catchCooldown = TickTimer.CreateFromSeconds(Runner, 3.0f);
-                }
             }
         }
     }

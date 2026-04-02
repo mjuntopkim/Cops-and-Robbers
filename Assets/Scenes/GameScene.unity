@@ -1381,6 +1381,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4852085621467891454, guid: c908ed6afbf11614f9e321278879d6f7, type: 3}
   m_PrefabInstance: {fileID: 40459797}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &40570892
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 40570893}
+  m_Layer: 0
+  m_Name: CopSpawn2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &40570893
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 40570892}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -6, y: 1, z: 30}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 262496625}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &41510064
 Mesh:
   m_ObjectHideFlags: 0
@@ -8499,7 +8530,7 @@ Transform:
   m_GameObject: {fileID: 218288150}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 26.27}
+  m_LocalPosition: {x: 0, y: 1, z: 30}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10059,6 +10090,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 218288151}
+  - {fileID: 40570893}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &264834774
@@ -14617,6 +14649,37 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1 &399359125
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 399359126}
+  m_Layer: 0
+  m_Name: RubberSpawn4
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &399359126
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399359125}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: -35}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1661209660}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &418235352
 Mesh:
   m_ObjectHideFlags: 0
@@ -15327,6 +15390,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6107979918083717061, guid: d7561889ed225f440abef01860a852b6, type: 3}
   m_PrefabInstance: {fileID: 437307159}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &442421927
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 442421928}
+  m_Layer: 0
+  m_Name: RubberSpawn2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &442421928
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 442421927}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -6, y: 1, z: -35}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1661209660}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &444954387
 GameObject:
   m_ObjectHideFlags: 0
@@ -20574,11 +20668,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 175166743b5fe5e428244bd7e306355f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerPrefab:
+  _copPrefab:
     RawGuidValue: d1f0a6d3b1765184eb466dadfe8caef2
+  _robberPrefab1:
+    RawGuidValue: dbfe9e830754b2a4daa981dee35ff10f
+  _robberPrefab2:
+    RawGuidValue: 9894a099badbe334985e633b4fdf6899
+  _robberPrefab3:
+    RawGuidValue: 3a5e6346b923e9e4cb8625c1ba7cbd8d
   _copSpawnPoint:
   - {fileID: 218288151}
-  _robberSpawnPoint: []
+  - {fileID: 40570893}
+  _robberSpawnPoint:
+  - {fileID: 985413772}
+  - {fileID: 442421928}
+  - {fileID: 758332096}
+  - {fileID: 399359126}
 --- !u!1001 &640536648
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22743,6 +22848,37 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1 &758332095
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 758332096}
+  m_Layer: 0
+  m_Name: RubberSpawn3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &758332096
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 758332095}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -6, y: 1, z: -30}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1661209660}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &760419250 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1376213756719181525, guid: c2013153b859e2a4f847ac17df1d4277, type: 3}
@@ -31750,8 +31886,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.17810415, y: 0.8213329, z: 0.39961314, w: -0.366061}
-  m_LocalPosition: {x: 0.96675956, y: 0, z: 0.86912364}
+  m_LocalRotation: {x: 0.011722833, y: 0.98827666, z: -0.10814431, w: 0.107129104}
+  m_LocalPosition: {x: -1.0714097, y: 1.3, z: 4.8838596}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -32621,7 +32757,7 @@ Transform:
   m_GameObject: {fileID: 985413771}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -32.8}
+  m_LocalPosition: {x: 0, y: 1, z: -30}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -47937,6 +48073,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 985413772}
+  - {fileID: 442421928}
+  - {fileID: 758332096}
+  - {fileID: 399359126}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1666021459

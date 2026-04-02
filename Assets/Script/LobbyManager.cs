@@ -7,23 +7,35 @@ using TMPro;
 
 public class LobbyManager : MonoBehaviour
 {
+    public static LobbyManager Instance;
+
     [SerializeField] private Button readyButton;
     [SerializeField] private Button startButton;
     [SerializeField] private TextMeshProUGUI roomName;
+    [SerializeField] private GameObject playerListItemPrefab;
+    [SerializeField] private Transform copScroll;
+    [SerializeField] private Transform robberScroll;
 
-    private NetworkRunner _runner;
+    private NetworkRunner runner;
     private LobbyPlayer _lobbyPlayer;
     private string _currentRoomTitle = "";
 
+    private Dictionary<LobbyPlayer, PlayerListItem> _playerListItem = new Dictionary<LobbyPlayer, PlayerListItem>();
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Start()
     {
-        _runner = FindObjectOfType<NetworkRunner>();
+        runner = FindObjectOfType<NetworkRunner>();
         
-        if(_runner != null)
+        if(runner != null)
         {
             UpdateRoomNameDisplay();
 
-            if (_runner.IsServer)
+            if (runner.IsServer)
             {
                 readyButton.gameObject.SetActive(false);
                 startButton.gameObject.SetActive(true);
@@ -55,6 +67,12 @@ public class LobbyManager : MonoBehaviour
         bool allReady = true;
         foreach(var player in allPlayer)
         {
+            if(player.Object == null || !player.Object.IsValid)
+            {
+                allReady = false;
+                continue;
+            }
+
             if(!player.HasInputAuthority && !player.IsReady)
             {
                 allReady = false;
@@ -67,9 +85,9 @@ public class LobbyManager : MonoBehaviour
 
     private void UpdateRoomNameDisplay()
     {
-        if(_runner != null && _runner.SessionInfo.IsValid)
+        if(runner != null && runner.SessionInfo.IsValid)
         {
-            if(_runner.SessionInfo.Properties.TryGetValue("RoomTitle", out var titleProp))
+            if(runner.SessionInfo.Properties.TryGetValue("RoomTitle", out var titleProp))
             {
                 if(titleProp.IsString && _currentRoomTitle != (string)titleProp)
                 {
@@ -77,6 +95,58 @@ public class LobbyManager : MonoBehaviour
                     roomName.text = _currentRoomTitle;
                 }
             }
+        }
+    }
+
+    public void AddPlayerUI(LobbyPlayer player)
+    {
+        GameObject obj = Instantiate(playerListItemPrefab, copScroll);
+        PlayerListItem item = obj.GetComponent<PlayerListItem>();
+
+        item.Setup(player);
+        _playerListItem.Add(player, item);
+
+        UpdatePlayerUIPosition(player);
+    }
+
+    public void UpdatePlayerUIPosition(LobbyPlayer player)
+    {
+        if(_playerListItem.TryGetValue(player, out PlayerListItem item))
+        {
+            Transform targetContent;
+            if (player.Role == PlayerRole.Cop)
+            {
+                targetContent = copScroll;
+            }
+            else
+            {
+                targetContent = robberScroll;
+            }
+
+            item.transform.SetParent(targetContent, false);
+
+            if (player.HasStateAuthority)
+            {
+                item.transform.SetAsFirstSibling();
+            }
+            
+        }
+    }
+
+    public void UpdatePlayerUIInfo(LobbyPlayer player)
+    {
+        if (_playerListItem.TryGetValue(player, out PlayerListItem item))
+        {
+            item.UpdateUI();
+        }
+    }
+
+    public void RemovePlayerUI(LobbyPlayer player)
+    {
+        if(_playerListItem.TryGetValue(player, out PlayerListItem item))
+        {
+            Destroy(item.gameObject);
+            _playerListItem.Remove(player);
         }
     }
 
@@ -120,9 +190,9 @@ public class LobbyManager : MonoBehaviour
 
     public void OnClickStartButton()
     {
-        if (_runner.IsServer)
+        if (runner.IsServer)
         {
-            _runner.LoadScene(SceneRef.FromIndex(2));
+            runner.LoadScene(SceneRef.FromIndex(2));
         }
     }
 

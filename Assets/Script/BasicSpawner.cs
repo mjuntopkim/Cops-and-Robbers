@@ -10,7 +10,10 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     private NetworkRunner _runner;
 
-    [SerializeField] private NetworkPrefabRef _playerPrefab;
+    [SerializeField] private NetworkPrefabRef _copPrefab;
+    [SerializeField] private NetworkPrefabRef _robberPrefab1;
+    [SerializeField] private NetworkPrefabRef _robberPrefab2;
+    [SerializeField] private NetworkPrefabRef _robberPrefab3;
 
     private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
     [SerializeField] private Transform[] _copSpawnPoint;
@@ -19,9 +22,9 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     private int _copSpawnCount = 0;
     private int _robberSpawnCount = 0;
 
-    public void Start()
+    public void Awake()
     {
-        var _runner = FindObjectOfType<NetworkRunner>();
+        _runner = FindObjectOfType<NetworkRunner>();
         if(_runner != null)
         {
             _runner.AddCallbacks(this);
@@ -30,7 +33,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnDestroy()
     {
-        var _runner = FindObjectOfType<NetworkRunner>();
+        _runner = FindObjectOfType<NetworkRunner>();
         if(_runner != null)
         {
             _runner.RemoveCallbacks(this);
@@ -62,42 +65,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
-
-    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
-    {
-        if (runner.IsServer)
-        {
-            PlayerRole assignedRole;
-            if (player == runner.LocalPlayer)
-            {
-                assignedRole = PlayerRole.Cop;
-            }
-            else
-            {
-                assignedRole = PlayerRole.Robber;
-            }
-
-            Vector3 spawnPosition = GetSpawnPosition(assignedRole);
-
-            NetworkObject networkPlayerObject = runner.Spawn(
-                _playerPrefab,
-                spawnPosition,
-                Quaternion.identity,
-                player,
-                (runner, obj) =>
-                {
-                    Player playerComponent = obj.GetComponent<Player>();
-                    if (playerComponent != null)
-                    {
-                        playerComponent.Role = assignedRole;
-                    }
-                }
-            );
-
-            _spawnedCharacters.Add(player, networkPlayerObject);
-        }
-    }
-
+    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) { }
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         if (runner.IsServer)
@@ -112,7 +80,46 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
-    public void OnSceneLoadDone(NetworkRunner runner) { }
+    public void OnSceneLoadDone(NetworkRunner runner) 
+    {
+        if (runner.IsServer)
+        {
+            LobbyPlayer[] allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
+
+            Debug.Log($"<color=yellow>씬 2 로드 완료! 찾은 로비 플레이어 수: {allLobbyPlayers.Length}명</color>");
+            
+            foreach (var lobbyPlayer in allLobbyPlayers)
+            {
+                PlayerRef playerRef = lobbyPlayer.Object.InputAuthority;
+                Vector3 spawnPosition = GetSpawnPosition(lobbyPlayer.Role);
+                NetworkPrefabRef prefabToSpawn = _copPrefab;
+
+                if(lobbyPlayer.Role == PlayerRole.Cop)
+                {
+                    prefabToSpawn = _copPrefab;
+                }
+                else if(lobbyPlayer.Role == PlayerRole.Robber)
+                {
+                    int randomRobber = UnityEngine.Random.Range(0, 3);
+                    if(randomRobber == 0)
+                    {
+                        prefabToSpawn = _robberPrefab1;
+                    }
+                    else if(randomRobber == 1)
+                    {
+                        prefabToSpawn = _robberPrefab2;
+                    }
+                    else
+                    {
+                        prefabToSpawn = _robberPrefab3;
+                    }
+                }
+
+                NetworkObject spawnObj = runner.Spawn(prefabToSpawn, spawnPosition, Quaternion.identity, playerRef);
+                _spawnedCharacters.Add(playerRef, spawnObj);
+            }
+        }
+    }
     public void OnSceneLoadStart(NetworkRunner runner) { }
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }

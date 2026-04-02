@@ -571,7 +571,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 191032464}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1589415539}
+        m_TargetAssemblyTypeName: LobbyManager, Assembly-CSharp
+        m_MethodName: OnClickRoleCopButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &191032464
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4023,7 +4035,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 801750501}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1589415539}
+        m_TargetAssemblyTypeName: LobbyManager, Assembly-CSharp
+        m_MethodName: OnClickRobberRoleButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &801750501
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6166,7 +6190,7 @@ GameObject:
   - component: {fileID: 1403572187}
   - component: {fileID: 1403572186}
   m_Layer: 5
-  m_Name: Cops (1)
+  m_Name: Robbers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7139,6 +7163,9 @@ MonoBehaviour:
   readyButton: {fileID: 886492686}
   startButton: {fileID: 952599409}
   roomName: {fileID: 1346415279}
+  playerListItemPrefab: {fileID: 4288224977345829863, guid: 685cb42ad4d7a3d4aac69c3ea73b6792, type: 3}
+  copScroll: {fileID: 599879755}
+  robberScroll: {fileID: 1032086774}
 --- !u!4 &1589415540
 Transform:
   m_ObjectHideFlags: 0
