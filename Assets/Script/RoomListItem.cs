@@ -11,12 +11,16 @@ public class RoomListItem : MonoBehaviour
     [SerializeField] private TextMeshProUGUI playerCountText;
     [SerializeField] private Button roomButton;
 
-    private string _roomName;
+    private string _sessionId;
     private MainMenuManager _menuManager;
 
     public void Setup(SessionInfo sessionInfo, MainMenuManager manager)
     {
         _menuManager = manager;
+
+        _sessionId = sessionInfo.Name;
+
+        string _roomName = sessionInfo.Name;
 
         if (sessionInfo.Properties != null && sessionInfo.Properties.TryGetValue("RoomTitle", out var titleprop))
         {
@@ -34,6 +38,6 @@ public class RoomListItem : MonoBehaviour
 
     private void OnClickRoom()
     {
-        _menuManager.OnRoomSelected(_roomName);
+        _menuManager.OnRoomSelected(_sessionId);
     }
 }

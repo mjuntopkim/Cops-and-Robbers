@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
-    private NetworkRunner _runner;
+    private NetworkRunner runner;
 
     [SerializeField] private NetworkPrefabRef _copPrefab;
     [SerializeField] private NetworkPrefabRef _robberPrefab1;
@@ -24,19 +24,19 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void Awake()
     {
-        _runner = FindObjectOfType<NetworkRunner>();
-        if(_runner != null)
+        runner = FindObjectOfType<NetworkRunner>();
+        if(runner != null)
         {
-            _runner.AddCallbacks(this);
+            runner.AddCallbacks(this);
         }
     }
 
     public void OnDestroy()
     {
-        _runner = FindObjectOfType<NetworkRunner>();
-        if(_runner != null)
+        runner = FindObjectOfType<NetworkRunner>();
+        if(runner != null)
         {
-            _runner.RemoveCallbacks(this);
+            runner.RemoveCallbacks(this);
         }
     }
 
@@ -85,8 +85,6 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         if (runner.IsServer)
         {
             LobbyPlayer[] allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
-
-            Debug.Log($"<color=yellow>씬 2 로드 완료! 찾은 로비 플레이어 수: {allLobbyPlayers.Length}명</color>");
             
             foreach (var lobbyPlayer in allLobbyPlayers)
             {

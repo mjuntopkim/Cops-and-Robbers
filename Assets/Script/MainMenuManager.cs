@@ -52,7 +52,7 @@ public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
         var startGameArgs = new StartGameArgs()
         {
             GameMode = GameMode.Host,
-            SessionName = System.Guid.NewGuid().ToString(),
+            SessionName = Guid.NewGuid().ToString(),
             SessionProperties = customProps,
             PlayerCount = 6,
             IsVisible = true,
@@ -95,17 +95,17 @@ public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
         joinButton.interactable = false;
     }
 
-    public async void OnClickJoinRoomButton(string roomName)
+    public async void OnClickJoinRoomButton()
     {
         var sceneManager = _runner.gameObject.GetComponent<NetworkSceneManagerDefault>();
 
         var startGameArgs = new StartGameArgs()
         {
             GameMode = GameMode.Client,
-            SessionName = roomName,
+            SessionName = _selectedRoomname,
             SceneManager = sceneManager
         };
-
+        
         await _runner.StartGame(startGameArgs);
     }
 
