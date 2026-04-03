@@ -21,7 +21,7 @@ public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
 
     [SerializeField]private NetworkRunner networkRunnerPrefab;
 
-    private NetworkRunner _runner;
+    private NetworkRunner runner;
     private string _selectedRoomname = "";
 
     public void OnClickExitButton()
@@ -40,11 +40,14 @@ public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
     {
         string newName = roomNameInputField.text;
 
-        _runner = Instantiate(networkRunnerPrefab);
-        _runner.name = "Network Runner";
-        _runner.AddCallbacks(this);
+        if (runner == null)
+        {
+            runner = Instantiate(networkRunnerPrefab);
+            runner.name = "Network Runner";
+            runner.AddCallbacks(this);
+        }
 
-        var sceneManager = _runner.gameObject.AddComponent<NetworkSceneManagerDefault>();
+        var sceneManager = runner.gameObject.AddComponent<NetworkSceneManagerDefault>();
 
         var customProps = new Dictionary<string, SessionProperty>();
         customProps.Add("RoomTitle", newName);
@@ -61,7 +64,7 @@ public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
             SceneManager = sceneManager
         };
 
-        await _runner.StartGame(startGameArgs);
+        await runner.StartGame(startGameArgs);
     }
 
     public async void OnClickJoinMenuButton()
@@ -70,15 +73,15 @@ public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
         joinPanel.SetActive(true);
         joinButton.interactable = false;
 
-        if (_runner == null)
+        if (runner == null)
         {
-            _runner = Instantiate(networkRunnerPrefab);
-            _runner.AddCallbacks(this);
+            runner = Instantiate(networkRunnerPrefab);
+            runner.AddCallbacks(this);
         }
 
-        if (!_runner.LobbyInfo.IsValid)
+        if (!runner.LobbyInfo.IsValid)
         {
-            await _runner.JoinSessionLobby(SessionLobby.ClientServer);
+            await runner.JoinSessionLobby(SessionLobby.ClientServer);
         }
     }
 
@@ -97,7 +100,7 @@ public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
 
     public async void OnClickJoinRoomButton()
     {
-        var sceneManager = _runner.gameObject.GetComponent<NetworkSceneManagerDefault>();
+        var sceneManager = runner.gameObject.GetComponent<NetworkSceneManagerDefault>();
 
         var startGameArgs = new StartGameArgs()
         {
@@ -106,7 +109,7 @@ public class MainMenuManager : NetworkBehaviour, INetworkRunnerCallbacks
             SceneManager = sceneManager
         };
         
-        await _runner.StartGame(startGameArgs);
+        await runner.StartGame(startGameArgs);
     }
 
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)

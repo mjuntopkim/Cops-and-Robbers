@@ -25,26 +25,29 @@ public class Player : NetworkBehaviour
 
     public override void Spawned()
     {
-        LobbyPlayer lobbyPlayer = FindObjectOfType<LobbyPlayer>();
+        LobbyPlayer[] allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
 
         _change = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
-        if (lobbyPlayer.Role == PlayerRole.Robber)
+        foreach (var player in allLobbyPlayers)
         {
-            _cc.maxSpeed = 6.0f;
-        }
-        else if(lobbyPlayer.Role == PlayerRole.Cop)
-        {
-            _cc.maxSpeed = 4.0f;
+            if (player.Object.InputAuthority == Object.InputAuthority)
+            {
+                if (player.Role == PlayerRole.Robber)
+                {
+                    _cc.maxSpeed = 6.0f;
+                }
+                else if (player.Role == PlayerRole.Cop)
+                {
+                    _cc.maxSpeed = 4.0f;
+                }
+                break;
+            }
         }
 
-        if (HasInputAuthority)
+        if (_freeLookCamera != null)
         {
-            _freeLookCamera.gameObject.SetActive(true);
-        }
-        else
-        {
-            _freeLookCamera.gameObject.SetActive(false);
+            _freeLookCamera.gameObject.SetActive(HasInputAuthority);
         }
     }
 

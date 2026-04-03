@@ -1730,7 +1730,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 40db3173a05ae3242b1c182a09b0a183, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_WarningMessage: 
@@ -1751,7 +1751,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _freeLookCamera: {fileID: 6458486571930209678}
-  _Role: 0
 --- !u!114 &2978739241212137055
 MonoBehaviour:
   m_ObjectHideFlags: 0
