@@ -39,7 +39,7 @@ public class Player : NetworkBehaviour
                 }
                 else if (player.Role == PlayerRole.Cop)
                 {
-                    _cc.maxSpeed = 4.0f;
+                    _cc.maxSpeed = 10.0f;
                 }
                 break;
             }

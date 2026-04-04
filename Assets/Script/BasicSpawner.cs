@@ -60,7 +60,9 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
         data.button.Set(0, Input.GetKey(KeyCode.Space));
 
-        data.button.Set(1, Input.GetKey(KeyCode.Mouse0));
+        data.button.Set(1, Input.GetKey(KeyCode.E));
+
+        data.button.Set(2, Input.GetKey(KeyCode.Mouse0));
 
         input.Set(data);
     }
