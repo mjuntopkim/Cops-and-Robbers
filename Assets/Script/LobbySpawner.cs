@@ -53,7 +53,7 @@ public class LobbySpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        
+        //여기서 디스폰, 플레이어가 나가면
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }

@@ -8,6 +8,7 @@ using TMPro;
 public class LobbyManager : MonoBehaviour
 {
     public static LobbyManager Instance;
+    public static Dictionary<PlayerRef, PlayerRole> LobbyRole = new Dictionary<PlayerRef, PlayerRole>();
 
     [SerializeField] private Button readyButton;
     [SerializeField] private Button startButton;
@@ -24,7 +25,10 @@ public class LobbyManager : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
+        if(Instance == null)
+        {
+            Instance = this;    //중복체크를 해야함(지금은 로비씬이 한번만 생겨서 상관은 없지만 나중에 문제가 생길 수 있다.(중복 참조))
+        }
     }
 
     private void Start()
@@ -51,7 +55,7 @@ public class LobbyManager : MonoBehaviour
 
     private void Update()
     {
-        CheckPlayerReady();
+        CheckPlayerReady(); //이벤트 기반으로 변경 할 것, 업데이트는 비워놓아야한다.
     }
 
     private void CheckPlayerReady()
@@ -192,13 +196,21 @@ public class LobbyManager : MonoBehaviour
     {
         if (runner.IsServer)
         {
+            LobbyRole.Clear();
+
+            LobbyPlayer[] allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
+            foreach(var lp in allLobbyPlayers)
+            {
+                LobbyRole.Add(lp.Object.InputAuthority, lp.Role);
+            }
+
             runner.LoadScene(SceneRef.FromIndex(2));
         }
     }
 
-    public LobbyPlayer GetLobbyPlayer()
+    public LobbyPlayer GetLobbyPlayer() //로비 플레이어가 스폰 될때 자기가 로컬이면 로비매니저에 등록을 해버리기
     {
-        var player = FindObjectsOfType<LobbyPlayer>();
+        var player = FindObjectsOfType<LobbyPlayer>(); 
         foreach(var p in player)
         {
             if (p.HasInputAuthority)

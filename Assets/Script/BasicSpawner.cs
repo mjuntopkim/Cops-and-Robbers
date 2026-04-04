@@ -60,6 +60,8 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
         data.button.Set(0, Input.GetKey(KeyCode.Space));
 
+        data.button.Set(1, Input.GetKey(KeyCode.Mouse0));
+
         input.Set(data);
     }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
@@ -84,19 +86,26 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (runner.IsServer)
         {
-            LobbyPlayer[] allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
-            
-            foreach (var lobbyPlayer in allLobbyPlayers)
-            {
-                PlayerRef playerRef = lobbyPlayer.Object.InputAuthority;
-                Vector3 spawnPosition = GetSpawnPosition(lobbyPlayer.Role);
-                NetworkPrefabRef prefabToSpawn = _copPrefab;
+            //LobbyPlayer[] allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();   //잘 되지만 / 퓨전 버전마다 다르다 - 퓨전이 자체적으로 관리하는 네트워크 오브젝트와 DontDestroyOnLoad오브젝트가 서로 충돌이 날 수 있다.
+                                                                                //그냥 퓨전 API를 사용 runner.ActivePlayers 사용 여기서 로비 플레이어 정보를 가져와서 사용
+                                                                                //FindObjectsOfType 유니티월드에서 사용 퓨전이랑 충돌날 수 있다.
 
-                if(lobbyPlayer.Role == PlayerRole.Cop)
+            foreach (PlayerRef playerRef in runner.ActivePlayers)
+            {
+                var playerRole = PlayerRole.Cop;
+                var prefabToSpawn = _copPrefab;
+
+                if (LobbyManager.LobbyRole.TryGetValue(playerRef, out PlayerRole savedRole)){
+                    playerRole = savedRole;
+                }
+
+                var spawnPosition = GetSpawnPosition(playerRole);
+
+                if(playerRole == PlayerRole.Cop)
                 {
                     prefabToSpawn = _copPrefab;
                 }
-                else if(lobbyPlayer.Role == PlayerRole.Robber)
+                else if(playerRole == PlayerRole.Robber)
                 {
                     int randomRobber = UnityEngine.Random.Range(0, 3);
                     if(randomRobber == 0)
@@ -113,6 +122,8 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
                     }
                 }
 
+                //로비 플레이 해제하는 코드가 없다. 메모리를 계속 잡아먹는다. 메모리 낭비 및 네트워크도 잡아먹는다. 그리고 체인지 디텍터로 계속 돌아간다.
+                //아무것도 안하는데 계속 돌아가서 메모리, 네트워크 낭비
                 NetworkObject spawnObj = runner.Spawn(prefabToSpawn, spawnPosition, Quaternion.identity, playerRef);
                 _spawnedCharacters.Add(playerRef, spawnObj);
             }
