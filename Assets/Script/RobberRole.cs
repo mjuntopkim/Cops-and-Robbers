@@ -135,6 +135,25 @@ public class RobberRole : NetworkBehaviour
         }
     }
 
+    public void Arrest(Vector3 prisonPoint)
+    {
+        if (!Object.HasStateAuthority)
+        {
+            return;
+        }
+
+        if (IsCarry)
+        {
+            IsCarry = false;
+        }
+
+        var ncc = GetComponent<NetworkCharacterController>();
+        if(ncc != null)
+        {
+            ncc.Teleport(prisonPoint);
+        }
+    }
+
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     public void RPC_Steal(StealItem targetItem)
     {
