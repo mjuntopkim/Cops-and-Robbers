@@ -12,15 +12,21 @@ public class CopRole : NetworkBehaviour
     [SerializeField] private float interactDistance = 5.0f;
     [SerializeField] private LayerMask itemLayer;
 
+    [SerializeField] private GameObject flashlightObject;
+
     [Networked] public int CopIndex { get; set; }
+    [Networked] public NetworkBool IsFlashlightOn { get; set; }
 
     public static CopRole LocalCop { get; private set; }
     public bool IsPlayingMiniGame { get; private set; }
 
     private FuseBox _currentFuseBox;
+    private ChangeDetector _changeDetector;
 
     public override void Spawned()
     {
+        _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
+
         if (HasInputAuthority)
         {
             LocalCop = this;
@@ -28,6 +34,11 @@ public class CopRole : NetworkBehaviour
         else
         {
             UIManager.Instance.SetInteractUIActive("", false);
+        }
+
+        if (flashlightObject != null)
+        {
+            flashlightObject.SetActive(IsFlashlightOn);
         }
     }
 
@@ -42,6 +53,25 @@ public class CopRole : NetworkBehaviour
         {
             UIManager.Instance.SetInteractUIActive("", false);
             return;
+        }
+
+        if (HasInputAuthority && !IsPlayingMiniGame)
+        {
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                RPC_ToggleFlashlight();
+            }
+        }
+
+        foreach (var change in _changeDetector.DetectChanges(this))
+        {
+            if (change == nameof(IsFlashlightOn))
+            {
+                if (flashlightObject != null)
+                {
+                    flashlightObject.SetActive(IsFlashlightOn);
+                }
+            }
         }
 
         Vector3 rayPosition = transform.position + (Vector3.up * 1f);
@@ -63,6 +93,17 @@ public class CopRole : NetworkBehaviour
             {
                 _currentFuseBox = null;
                 UIManager.Instance.SetInteractUIActive("", false);
+            }
+
+            if (hit.collider.TryGetComponent(out Door door))
+            {
+                string prompt = door.IsOpen ? "[E] Open" : "[E] Close";
+                UIManager.Instance.SetInteractUIActive(prompt, true);
+
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    door.RPC_ToggleDoor();
+                }
             }
         }
         else
@@ -177,5 +218,11 @@ public class CopRole : NetworkBehaviour
                 ExecuteArrest(robber);
             }
         }
+    }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    private void RPC_ToggleFlashlight()
+    {
+        IsFlashlightOn = !IsFlashlightOn;
     }
 }

@@ -98,6 +98,9 @@ public class SequenceMiniGame : MonoBehaviour, IMiniGame
             Debug.Log("½ÇÆÐ");
             _currentIndex = 0;
             FlashFailUI();
+
+            _onFail?.Invoke();
+            Invoke(nameof(EndGame), 0.2f);
         }
     }
 

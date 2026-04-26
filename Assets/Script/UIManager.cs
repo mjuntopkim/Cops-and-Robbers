@@ -8,6 +8,7 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
 
     [SerializeField] private TextMeshProUGUI _interactUI;
+    [SerializeField] private TextMeshProUGUI _alertUI;
 
     private void Awake()
     {
@@ -37,5 +38,21 @@ public class UIManager : MonoBehaviour
                 _interactUI.gameObject.SetActive(false);
             }
         }
+    }
+
+    public void ShowGlobalAlarm(string message, float duration)
+    {
+        StopAllCoroutines();
+        StartCoroutine(AlarmDisplayRoutine(message, duration));
+    }
+
+    private IEnumerator AlarmDisplayRoutine(string message, float duration)
+    {
+        _alertUI.text = message;
+        _alertUI.gameObject.SetActive(true);
+
+        yield return new WaitForSeconds(duration);
+
+        _alertUI.gameObject.SetActive(false);
     }
 }

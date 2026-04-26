@@ -82,6 +82,28 @@ public class RobberRole : NetworkBehaviour
                 _currentFuseBox = null;
                 UIManager.Instance.SetInteractUIActive("",false);
             }
+
+            if (hit.collider.TryGetComponent(out Door door))
+            {
+                if (!door.IsOpen)
+                {
+                    UIManager.Instance.SetInteractUIActive("[E] Open", true);
+                    if (Input.GetKeyDown(KeyCode.E) && !IsPlayingMiniGame)
+                    {
+                        IsPlayingMiniGame = true;
+                        MiniGameManager.Instance.PlayRandomMiniGame(
+                            onSuccess: () => {
+                                IsPlayingMiniGame = false;
+                                door.RPC_ToggleDoor();
+                },
+                            onFail: () => {
+                                IsPlayingMiniGame = false;
+                                RPC_BroadcastFailAlarm();
+                }
+                        );
+                    }
+                }
+            }
         }
         else
         {
@@ -108,7 +130,7 @@ public class RobberRole : NetworkBehaviour
                 }
                 else if (_currentFuseBox != null)
                 {
-                    TryTurnOffBreaker();
+                    TryTurnOffFuse();
                 }
             }
         }
@@ -139,12 +161,12 @@ public class RobberRole : NetworkBehaviour
             {
                 IsPlayingMiniGame = false;
                 StealSuccess(_currentItem);
-                Debug.Log("미니게임 성공");
             },
             onFail: () =>
             {
                 IsPlayingMiniGame = false;
-                Debug.LogWarning("미니게임 실패");
+                RPC_BroadcastFailAlarm();
+                UIManager.Instance.ShowGlobalAlarm("<color=red> You triggered an alarm!! </color>", 3.0f);
             }
         );
     }
@@ -199,7 +221,7 @@ public class RobberRole : NetworkBehaviour
         }
     }
 
-    private void TryTurnOffBreaker()
+    private void TryTurnOffFuse()
     {
         if (IsPlayingMiniGame || _currentFuseBox == null || !_currentFuseBox.IsPowerOn) return;
 
@@ -212,16 +234,17 @@ public class RobberRole : NetworkBehaviour
             onSuccess: () =>
             {
                 IsPlayingMiniGame = false;
-                BreakerSuccess(_currentFuseBox);
+                FuseSuccess(_currentFuseBox);
             },
             onFail: () =>
             {
                 IsPlayingMiniGame = false;
+                RPC_BroadcastFailAlarm();
             }
         );
     }
 
-    private void BreakerSuccess(FuseBox fuse)
+    private void FuseSuccess(FuseBox fuse)
     {
         if (Object.HasStateAuthority)
         {
@@ -229,12 +252,12 @@ public class RobberRole : NetworkBehaviour
         }
         else
         {
-            RPC_TurnOffBreaker(fuse);
+            RPC_TurnOffFuse(fuse);
         }
     }
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    public void RPC_TurnOffBreaker(FuseBox fuse)
+    public void RPC_TurnOffFuse(FuseBox fuse)
     {
         if (fuse.IsPowerOn)
         {
@@ -259,6 +282,15 @@ public class RobberRole : NetworkBehaviour
         {
             IsCarry = false;
             bag.AddItem();
+        }
+    }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+    public void RPC_BroadcastFailAlarm()
+    {
+        if (CopRole.LocalCop != null)
+        {
+            UIManager.Instance.ShowGlobalAlarm("<color=red>Someone triggered an alarm !!</color>", 3.0f);
         }
     }
 }
