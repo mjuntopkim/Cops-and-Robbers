@@ -50,6 +50,20 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         var data = new NetworkInputData();
 
+        RobberRole myRobber = RobberRole.LocalRobber;
+        if (myRobber != null && myRobber.IsPlayingMiniGame)
+        {
+            input.Set(data);
+            return;
+        }
+
+        CopRole myCop = CopRole.LocalCop;
+        if (myCop != null && myCop.IsPlayingMiniGame)
+        {
+            input.Set(data); 
+            return; 
+        }
+
         data.direction = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         data.direction.Normalize();
 
@@ -57,8 +71,6 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         {
             data.cameraYaw = Camera.main.transform.eulerAngles.y;
         }
-
-        data.button.Set(0, Input.GetKey(KeyCode.Space));
 
         data.button.Set(1, Input.GetKey(KeyCode.E));
 

@@ -1885,6 +1885,10 @@ MonoBehaviour:
   targetLayer:
     serializedVersion: 2
     m_Bits: 64
+  interactDistance: 5
+  itemLayer:
+    serializedVersion: 2
+    m_Bits: 8
   _CopIndex: 0
 --- !u!1 &8283408765348017143
 GameObject:

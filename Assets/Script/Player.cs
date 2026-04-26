@@ -57,20 +57,6 @@ public class Player : NetworkBehaviour
         {
             _animator.SetFloat("Speed", AnimSpeed);
             _animator.SetFloat("MotionSpeed", 4.0f);
-
-            bool isGrounded = _cc.Grounded;
-            _animator.SetBool("Grounded", isGrounded);
-
-            _animator.SetBool("FreeFall", !isGrounded && _cc.Velocity.y < 0);
-
-            if(!isGrounded && _cc.Velocity.y > 2)   //_cc.Velocity.y > 0 으로인해 0.001 같은 작은 수로도 점프 애니메이션이 작동함(평지에서도)
-            {                                       //_cc.Velocity.y > 0 유니티 기본엔진은 지터값 무시, 퓨전은 무시 안함 매우 예민
-                _animator.SetBool("Jump", true);
-            }
-            else if (isGrounded)
-            {
-                _animator.SetBool("Jump", false);
-            }
         }
     }
 
@@ -93,11 +79,6 @@ public class Player : NetworkBehaviour
             }
 
             _cc.Move(moveDirection);
-
-            if(data.button.IsSet(0))
-            {
-                _cc.Jump();
-            }
         }
     }
 }

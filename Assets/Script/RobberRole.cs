@@ -13,6 +13,10 @@ public class RobberRole : NetworkBehaviour
 
     private StealItem _currentItem;
     private StolenItemBag _currentBag;
+    private FuseBox _currentFuseBox;
+
+    public bool IsPlayingMiniGame { get; private set; }
+    public static RobberRole LocalRobber { get; private set; }
 
     public override void Spawned()
     {
@@ -20,12 +24,22 @@ public class RobberRole : NetworkBehaviour
         {
             UIManager.Instance.SetInteractUIActive("", false);
         }
+        else
+        {
+            LocalRobber = this;
+        }
     }
 
     public override void Render()
     {
         if (!HasInputAuthority)
         {
+            return;
+        }
+
+        if (IsPlayingMiniGame)
+        {
+            UIManager.Instance.SetInteractUIActive("", false);
             return;
         }
 
@@ -38,28 +52,42 @@ public class RobberRole : NetworkBehaviour
         {
             StealItem item = hit.collider.GetComponent<StealItem>();
             StolenItemBag bag = hit.collider.GetComponent<StolenItemBag>();
+            FuseBox fuse = hit.collider.GetComponent<FuseBox>();
 
             if(item != null && !item.IsStolen && !IsCarry)
             {
                 _currentItem = item;
                 _currentBag = null;
+                _currentFuseBox = null;
                 UIManager.Instance.SetInteractUIActive("[E] Take", true);
             }
             else if(bag != null && IsCarry)
             {
                 _currentItem = null;
                 _currentBag = bag;
+                _currentFuseBox = null;
                 UIManager.Instance.SetInteractUIActive("[E] Put", true);
+            }
+            else if(fuse != null && fuse.IsPowerOn)
+            {
+                _currentItem = null;
+                _currentBag = null;
+                _currentFuseBox = fuse;
+                UIManager.Instance.SetInteractUIActive("[E] Context", true);
             }
             else
             {
                 _currentItem = null;
+                _currentBag = null;
+                _currentFuseBox = null;
                 UIManager.Instance.SetInteractUIActive("",false);
             }
         }
         else
         {
             _currentItem = null;
+            _currentBag = null;
+            _currentFuseBox = null;
             UIManager.Instance.SetInteractUIActive("",false);
         }
     }
@@ -78,13 +106,17 @@ public class RobberRole : NetworkBehaviour
                 {
                     TryPutItem();
                 }
+                else if (_currentFuseBox != null)
+                {
+                    TryTurnOffBreaker();
+                }
             }
         }
     }
 
     private void TryStealItem()
     {
-        if (IsCarry || _currentItem == null || _currentItem.IsStolen)
+        if (IsPlayingMiniGame || IsCarry || _currentItem == null || _currentItem.IsStolen)
         {
             return;
         }
@@ -95,13 +127,26 @@ public class RobberRole : NetworkBehaviour
             return;
         }
 
-        //StratMiniGame(_currentItem)
-        StealSuccess(_currentItem);
+        StartMiniGame(_currentItem);
     }
 
     private void StartMiniGame(StealItem targetItem)
     {
-        //미니게임 성공시 StealSuccess();
+        IsPlayingMiniGame = true;
+
+        MiniGameManager.Instance.PlayRandomMiniGame(
+            onSuccess: () =>
+            {
+                IsPlayingMiniGame = false;
+                StealSuccess(_currentItem);
+                Debug.Log("미니게임 성공");
+            },
+            onFail: () =>
+            {
+                IsPlayingMiniGame = false;
+                Debug.LogWarning("미니게임 실패");
+            }
+        );
     }
 
     private void StealSuccess(StealItem targetItem)
@@ -151,6 +196,49 @@ public class RobberRole : NetworkBehaviour
         if(ncc != null)
         {
             ncc.Teleport(prisonPoint);
+        }
+    }
+
+    private void TryTurnOffBreaker()
+    {
+        if (IsPlayingMiniGame || _currentFuseBox == null || !_currentFuseBox.IsPowerOn) return;
+
+        float distance = Vector3.Distance(transform.position, _currentFuseBox.transform.position);
+        if (distance > interactDistance) return;
+
+        IsPlayingMiniGame = true;
+
+        MiniGameManager.Instance.PlayRandomMiniGame(
+            onSuccess: () =>
+            {
+                IsPlayingMiniGame = false;
+                BreakerSuccess(_currentFuseBox);
+            },
+            onFail: () =>
+            {
+                IsPlayingMiniGame = false;
+            }
+        );
+    }
+
+    private void BreakerSuccess(FuseBox fuse)
+    {
+        if (Object.HasStateAuthority)
+        {
+            fuse.TurnOffPower();
+        }
+        else
+        {
+            RPC_TurnOffBreaker(fuse);
+        }
+    }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    public void RPC_TurnOffBreaker(FuseBox fuse)
+    {
+        if (fuse.IsPowerOn)
+        {
+            fuse.TurnOffPower();
         }
     }
 
