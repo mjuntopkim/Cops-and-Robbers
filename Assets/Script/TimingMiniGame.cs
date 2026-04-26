@@ -79,12 +79,18 @@ public class TimingMiniGame : MonoBehaviour, IMiniGame
         if(_currentAngle >= _targetZoneStartAngle && _currentAngle <= zoneEndAngle)
         {
             Debug.Log("성공");
-            _onSuccess?.Invoke();
+            if (_onSuccess != null)
+            {
+                _onSuccess();
+            }
         }
         else
         {
             Debug.Log("실패");
-            _onFail?.Invoke();
+            if (_onFail != null)
+            {
+                _onFail();
+            }
         }
 
         EndGame();

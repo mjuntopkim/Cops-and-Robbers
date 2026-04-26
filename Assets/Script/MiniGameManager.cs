@@ -42,12 +42,18 @@ public class MiniGameManager : MonoBehaviour
             onSuccess: () =>
             {
                 _currentMiniGame = null;
-                onSuccess?.Invoke();
+                if (onSuccess != null)
+                {
+                    onSuccess();
+                }
             },
             onFail: () =>
             {
                 _currentMiniGame = null;
-                onFail?.Invoke();
+                if (onFail != null)
+                {
+                    onFail();
+                }
             }
         );
     }

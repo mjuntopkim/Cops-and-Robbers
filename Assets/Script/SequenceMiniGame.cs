@@ -89,7 +89,10 @@ public class SequenceMiniGame : MonoBehaviour, IMiniGame
             {
                 _isPlaying = false;
                 Debug.Log("¼º°ø");
-                _onSuccess?.Invoke();
+                if (_onSuccess != null)
+                {
+                    _onSuccess();
+                }
                 EndGame();
             }
         }
@@ -99,7 +102,10 @@ public class SequenceMiniGame : MonoBehaviour, IMiniGame
             _currentIndex = 0;
             FlashFailUI();
 
-            _onFail?.Invoke();
+            if (_onFail != null)
+            {
+                _onFail();
+            }
             Invoke(nameof(EndGame), 0.2f);
         }
     }
@@ -121,6 +127,5 @@ public class SequenceMiniGame : MonoBehaviour, IMiniGame
             tmp.color = failColor;
         }
         CancelInvoke(nameof(UpdateUI));
-        Invoke(nameof(UpdateUI), 0.2f);
     }
 }

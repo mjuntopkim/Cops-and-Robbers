@@ -37,8 +37,6 @@ public class FuseBox : NetworkBehaviour
                 lightObj.SetActive(isOn);
             }
         }
-
-        Debug.Log(isOn ? "전력 복구." : "정전");
     }
 
     public void TurnOffPower()

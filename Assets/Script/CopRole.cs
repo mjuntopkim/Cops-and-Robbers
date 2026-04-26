@@ -83,7 +83,6 @@ public class CopRole : NetworkBehaviour
         {
             FuseBox breaker = hit.collider.GetComponentInParent<FuseBox>();
 
-            // 차단기가 존재하고, 꺼져있을 때만 UI 표시
             if (breaker != null && !breaker.IsPowerOn)
             {
                 _currentFuseBox = breaker;

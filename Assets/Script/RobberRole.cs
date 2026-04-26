@@ -73,7 +73,7 @@ public class RobberRole : NetworkBehaviour
                 _currentItem = null;
                 _currentBag = null;
                 _currentFuseBox = fuse;
-                UIManager.Instance.SetInteractUIActive("[E] Context", true);
+                UIManager.Instance.SetInteractUIActive("[E] Contect", true);
             }
             else
             {
