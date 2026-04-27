@@ -96,7 +96,7 @@ public class CopRole : NetworkBehaviour
 
             if (hit.collider.TryGetComponent(out Door door))
             {
-                string prompt = door.IsOpen ? "[E] Open" : "[E] Close";
+                string prompt = door.IsOpen ? "[E] Close" : "[E] Open";
                 UIManager.Instance.SetInteractUIActive(prompt, true);
 
                 if (Input.GetKeyDown(KeyCode.E))
