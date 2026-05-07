@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
 
-public class FuseBox : NetworkBehaviour
+public class FuseBox : NetworkBehaviour, IInteractable
 {
     [SerializeField] private List<GameObject> lights = new List<GameObject>();
 
@@ -38,20 +38,29 @@ public class FuseBox : NetworkBehaviour
             }
         }
     }
-
-    public void TurnOffPower()
+    
+    public string GetInteractPrompt(NetworkBehaviour interactor)
     {
-        if (Object.HasStateAuthority)
+        if(interactor is RobberRole robber && IsPowerOn)
         {
-            IsPowerOn = false;
+            return "[E] Contect";
         }
+        if(interactor is CopRole cop && !IsPowerOn)
+        {
+            return "[E] Contect";
+        }
+        return "";
     }
 
-    public void TurnOnPower()
+    public void Interact(NetworkBehaviour interactor)
     {
-        if (Object.HasStateAuthority)
+        if(interactor is RobberRole robber && IsPowerOn)
         {
-            IsPowerOn = true;
+            robber.StartFuseMiniGame(this);
+        }
+        else if(interactor is CopRole cop && !IsPowerOn)
+        {
+            cop.StartRestorePowerMiniGame(this);
         }
     }
 }

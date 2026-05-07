@@ -1401,7 +1401,7 @@ MonoBehaviour:
   jumpImpulse: 8
   acceleration: 10
   braking: 10
-  maxSpeed: 2
+  maxSpeed: 6
   rotationSpeed: 15
 --- !u!136 &2078447429678930885
 CapsuleCollider:
@@ -1469,6 +1469,8 @@ MonoBehaviour:
   itemLayer:
     serializedVersion: 2
     m_Bits: 8
+  _IsCarry:
+    _value: 0
 --- !u!1 &6691391944531860587
 GameObject:
   m_ObjectHideFlags: 0

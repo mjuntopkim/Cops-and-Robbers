@@ -9,7 +9,7 @@ public class PrisonManager : NetworkBehaviour
 
     [SerializeField] private Transform[] prisonPoint;
 
-    private void Awake()
+    public override void Spawned()
     {
         if(Instance == null)
         {

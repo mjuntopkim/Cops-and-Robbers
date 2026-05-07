@@ -20,7 +20,7 @@ public class CopRole : NetworkBehaviour
     public static CopRole LocalCop { get; private set; }
     public bool IsPlayingMiniGame { get; private set; }
 
-    private FuseBox _currentFuseBox;
+    private IInteractable _currentInteractable;
     private ChangeDetector _changeDetector;
 
     public override void Spawned()
@@ -81,33 +81,24 @@ public class CopRole : NetworkBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, interactDistance, itemLayer))
         {
-            FuseBox breaker = hit.collider.GetComponentInParent<FuseBox>();
+            IInteractable interactable = hit.collider.GetComponentInParent<IInteractable>();
 
-            if (breaker != null && !breaker.IsPowerOn)
+            if (interactable != null)
             {
-                _currentFuseBox = breaker;
-                UIManager.Instance.SetInteractUIActive("[E] Contect", true);
+                _currentInteractable = interactable;
+                string prompt = _currentInteractable.GetInteractPrompt(this);
+
+                UIManager.Instance.SetInteractUIActive(prompt, true);
             }
             else
             {
-                _currentFuseBox = null;
+                _currentInteractable = null;
                 UIManager.Instance.SetInteractUIActive("", false);
-            }
-
-            if (hit.collider.TryGetComponent(out Door door))
-            {
-                string prompt = door.IsOpen ? "[E] Close" : "[E] Open";
-                UIManager.Instance.SetInteractUIActive(prompt, true);
-
-                if (Input.GetKeyDown(KeyCode.E))
-                {
-                    door.RPC_ToggleDoor();
-                }
             }
         }
         else
         {
-            _currentFuseBox = null;
+            _currentInteractable = null;
             UIManager.Instance.SetInteractUIActive("", false);
         }
     }
@@ -123,9 +114,10 @@ public class CopRole : NetworkBehaviour
 
             if (data.button.IsSet(1))
             {
-                if (_currentFuseBox != null)
+                if (_currentInteractable != null)
                 {
-                    TryRestorePower();
+                    _currentInteractable.Interact(this);
+                    _currentInteractable = null;
                 }
             }
         }
@@ -161,49 +153,20 @@ public class CopRole : NetworkBehaviour
         robber.Arrest(prisonPos);
     }
 
-    private void TryRestorePower()
+    public void StartRestorePowerMiniGame(FuseBox fuse)
     {
-        if (IsPlayingMiniGame || _currentFuseBox == null || _currentFuseBox.IsPowerOn) return;
-
-        float distance = Vector3.Distance(transform.position, _currentFuseBox.transform.position);
-        if (distance > interactDistance) return;
-
-        IsPlayingMiniGame = true; 
+        IsPlayingMiniGame = true;
 
         MiniGameManager.Instance.PlayRandomMiniGame(
             onSuccess: () =>
             {
-                IsPlayingMiniGame = false; 
-                PowerRestoreSuccess(_currentFuseBox);
-                Debug.Log("전력 복구 성공");
+                IsPlayingMiniGame = false;
+                RPC_SetPower(fuse, true);
             },
             onFail: () =>
             {
                 IsPlayingMiniGame = false;
-                Debug.LogWarning("전력 복구 실패");
-            }
-        );
-    }
-
-    private void PowerRestoreSuccess(FuseBox fuse)
-    {
-        if (Object.HasStateAuthority)
-        {
-            fuse.TurnOnPower();
-        }
-        else
-        {
-            RPC_RequestTurnOn(fuse);
-        }
-    }
-
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    private void RPC_RequestTurnOn(FuseBox fuse)
-    {
-        if (!fuse.IsPowerOn)
-        {
-            fuse.TurnOnPower();
-        }
+            });
     }
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
@@ -216,6 +179,24 @@ public class CopRole : NetworkBehaviour
             {
                 ExecuteArrest(robber);
             }
+        }
+    }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    public void RPC_ToggleDoor(Door targetDoor)
+    {
+        if(targetDoor != null)
+        {
+            targetDoor.IsOpen = !targetDoor.IsOpen;
+        }
+    }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    public void RPC_SetPower(FuseBox fuse, NetworkBool isOn)
+    {
+        if(fuse != null)
+        {
+            fuse.IsPowerOn = isOn;
         }
     }
 

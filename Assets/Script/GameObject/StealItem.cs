@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
 
-public class StealItem : NetworkBehaviour
+public class StealItem : NetworkBehaviour, IInteractable
 {
     [Networked] public NetworkBool IsStolen { get; set; }
 
@@ -52,6 +52,24 @@ public class StealItem : NetworkBehaviour
         if(_collider != null)
         {
             _collider.enabled = isVisible;
+        }
+    }
+
+    public string GetInteractPrompt(NetworkBehaviour interactor)
+    {
+        if(interactor is RobberRole robber && !IsStolen && !robber.IsCarry)
+        {
+            return "[E] Take";
+        }
+
+        return "";
+    }
+
+    public void Interact(NetworkBehaviour interactor)
+    {
+        if(interactor is RobberRole robber && !IsStolen && !robber.IsCarry)
+        {
+            robber.StartStealMiniGame(this);
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
 
-public class Door : NetworkBehaviour
+public class Door : NetworkBehaviour, IInteractable
 {
     [Networked] public NetworkBool IsOpen { get; set; }
     private ChangeDetector _changeDetector;
@@ -32,14 +32,35 @@ public class Door : NetworkBehaviour
         doorMesh.localPosition = Vector3.Lerp(doorMesh.localPosition, _targetPos, Time.deltaTime * openSpeed);
     }
 
+    public string GetInteractPrompt(NetworkBehaviour interactor)
+    {
+        if (IsOpen)
+        {
+            return "[E] Close";
+        }
+        else
+        {
+            return "[E] Open";
+        }
+    }
+
+    public void Interact(NetworkBehaviour interactor)
+    {
+        if(interactor is RobberRole robber)
+        {
+            if(!IsOpen && !robber.IsPlayingMiniGame)
+            {
+                robber.StartDoorMiniGame(this);
+            }
+        }
+        else if(interactor is CopRole cop)
+        {
+            cop.RPC_ToggleDoor(this);
+        }
+    }
+
     private void UpdateVisuals()
     {
         _targetPos = IsOpen ? _closedPos + openOffset : _closedPos;
-    }
-
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    public void RPC_ToggleDoor()
-    {
-        IsOpen = !IsOpen;
     }
 }
