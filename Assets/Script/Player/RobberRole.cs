@@ -211,7 +211,12 @@ public class RobberRole : NetworkBehaviour
     {
         if (CopRole.LocalCop != null)
         {
+            CitizenAI[] allCitizens = FindObjectsOfType<CitizenAI>();
             UIManager.Instance.ShowGlobalAlarm("<color=red>Someone triggered an alarm !!</color>", 3.0f);
+            foreach (var citizen in allCitizens)
+            {
+                citizen.TriggerAlarm();
+            }
         }
     }
 

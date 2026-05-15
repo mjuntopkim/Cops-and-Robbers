@@ -29,22 +29,6 @@ public class Player : NetworkBehaviour
 
         _change = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
-        foreach (var player in allLobbyPlayers)
-        {
-            if (player.Object.InputAuthority == Object.InputAuthority)
-            {
-                if (player.Role == PlayerRole.Robber)
-                {
-                    _cc.maxSpeed = 6.0f;
-                }
-                else if (player.Role == PlayerRole.Cop)
-                {
-                    _cc.maxSpeed = 10.0f;
-                }
-                break;
-            }
-        }
-
         if (_freeLookCamera != null)
         {
             _freeLookCamera.gameObject.SetActive(HasInputAuthority);
@@ -64,9 +48,25 @@ public class Player : NetworkBehaviour
     {
         if (GetInput(out NetworkInputData data))
         {
+            float targetSpeed = 6.0f;
+
+            if (data.button.IsSet(3))
+            {
+                targetSpeed = 10.0f;
+            }
+
+            _cc.maxSpeed = targetSpeed;
+
             if (HasStateAuthority)
             {
-                AnimSpeed = data.direction.magnitude;
+                if(data.direction.magnitude > 0)
+                {
+                    AnimSpeed = targetSpeed;
+                }
+                else
+                {
+                    AnimSpeed = 0.0f;
+                }
             }
 
             Vector3 moveDirection = Quaternion.Euler(0, data.cameraYaw, 0) * data.direction;
