@@ -541,8 +541,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ffdea968e48c4f4684fcfcd6e668e62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _CurrentState: 0
+  walkSpeed: 6
+  runSpeed: 10
+  idleWaitTime: 3
+  fleeWaitTime: 1
+  fleeDuration: 10
   wanderRadius: 10
-  wanderTimer: 10
 --- !u!114 &-6395853575436458321
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -572,7 +577,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 2333858876761640043}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
+  m_Radius: 0.6
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
