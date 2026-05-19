@@ -206,17 +206,26 @@ public class RobberRole : NetworkBehaviour
         }
     }
 
-    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     public void RPC_BroadcastFailAlarm()
     {
-        if (CopRole.LocalCop != null)
+        if(AIManager.Instance != null)
         {
-            CitizenAI[] allCitizens = FindObjectsOfType<CitizenAI>();
-            UIManager.Instance.ShowGlobalAlarm("<color=red>Someone triggered an alarm !!</color>", 3.0f);
-            foreach (var citizen in allCitizens)
+            foreach(var citizen in AIManager.Instance.ActiveCitizens)
             {
                 citizen.TriggerAlarm();
             }
+        }
+
+        RPC_ShowGlobalAlarm();
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPC_ShowGlobalAlarm()
+    {
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowGlobalAlarm("<color=red>Someone triggered an alarm !!</color>", 3.0f);
         }
     }
 

@@ -26,7 +26,9 @@ public class CitizenAI : NetworkBehaviour
     [SerializeField] private float wanderRadius = 10.0f;
     
     private float _stateTimer;
+    private float _patrolTimer;
     private float _fleeTotalTimer;
+    private int _searchCount = 5;
 
     private Vector3 _lastVisualPos;
 
@@ -38,6 +40,11 @@ public class CitizenAI : NetworkBehaviour
         _animator.SetFloat("MotionSpeed", 4.0f);
 
         _lastVisualPos = transform.position;
+
+        if(AIManager.Instance != null)
+        {
+            AIManager.Instance.ActiveCitizens.Add(this);
+        }
 
         ChangeState(CitizenState.Idle);
     }
@@ -77,18 +84,8 @@ public class CitizenAI : NetworkBehaviour
 
         if (moveDist > 0.001f)
         {
-            switch (CurrentState)
-            {
-                case CitizenState.Idle:
-                    _animator.SetFloat("Speed", 0.0f);
-                    break;
-                case CitizenState.Patrol:
-                    _animator.SetFloat("Speed", 6.0f);
-                    break;
-                case CitizenState.Flee:
-                    _animator.SetFloat("Speed", 10.0f);
-                    break;
-            }
+            float speed = moveDist / Time.deltaTime;
+            _animator.SetFloat("Speed", speed);
         }
         else
         {
@@ -100,6 +97,7 @@ public class CitizenAI : NetworkBehaviour
     {
         CurrentState = state;
         _stateTimer = 0f;
+        _patrolTimer = 0f;
 
         switch (CurrentState)
         {
@@ -132,9 +130,25 @@ public class CitizenAI : NetworkBehaviour
 
     private void UpdatePatrol(float dt)
     {
-        if(!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance)
+        _patrolTimer += dt;
+        if (_patrolTimer >= 10f)
         {
             ChangeState(CitizenState.Idle);
+            return;
+        }
+
+        if (!_agent.pathPending)
+        {
+            if(_agent.pathStatus == NavMeshPathStatus.PathInvalid || _agent.pathStatus == NavMeshPathStatus.PathPartial)
+            {
+                ChangeState(CitizenState.Idle);
+                return;
+            }
+
+            if(_agent.remainingDistance <= _agent.stoppingDistance)
+            {
+                ChangeState(CitizenState.Idle);
+            }
         }
     }
 
@@ -174,13 +188,29 @@ public class CitizenAI : NetworkBehaviour
 
     private void SetRandomDestination()
     {
-        Vector3 randomDirection = Random.insideUnitSphere * wanderRadius;
-        randomDirection += transform.position;
-
         NavMeshHit hit;
-        if(NavMesh.SamplePosition(randomDirection, out hit, wanderRadius, NavMesh.AllAreas))
+
+        for(int i = 0; i < _searchCount; i++)
         {
-            _agent.SetDestination(hit.position);
+            Vector2 randomCircle = Random.insideUnitCircle * wanderRadius;
+            Vector3 randomDirection = new Vector3(randomCircle.x, 0f, randomCircle.y);
+            randomDirection += transform.position;
+
+            if (NavMesh.SamplePosition(randomDirection, out hit, wanderRadius, NavMesh.AllAreas))   
+            {                                                                                       
+                _agent.SetDestination(hit.position);                                               
+                return;
+            }
+        }
+
+        ChangeState(CitizenState.Idle);
+    }
+
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        if(AIManager.Instance != null)
+        {
+            AIManager.Instance.ActiveCitizens.Remove(this);
         }
     }
 }

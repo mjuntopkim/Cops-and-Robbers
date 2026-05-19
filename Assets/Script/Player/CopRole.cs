@@ -22,6 +22,7 @@ public class CopRole : NetworkBehaviour
 
     private IInteractable _currentInteractable;
     private ChangeDetector _changeDetector;
+    private Camera _mainCamera;
 
     public override void Spawned()
     {
@@ -40,6 +41,8 @@ public class CopRole : NetworkBehaviour
         {
             flashlightObject.SetActive(IsFlashlightOn);
         }
+
+        _mainCamera = Camera.main;
     }
 
     public override void Render()
@@ -55,14 +58,6 @@ public class CopRole : NetworkBehaviour
             return;
         }
 
-        if (HasInputAuthority && !IsPlayingMiniGame)
-        {
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                RPC_ToggleFlashlight();
-            }
-        }
-
         foreach (var change in _changeDetector.DetectChanges(this))
         {
             if (change == nameof(IsFlashlightOn))
@@ -75,7 +70,7 @@ public class CopRole : NetworkBehaviour
         }
 
         Vector3 rayPosition = transform.position + (Vector3.up * 1f);
-        Vector3 rayDirection = Camera.main.transform.forward;
+        Vector3 rayDirection = _mainCamera.transform.forward; 
 
         Ray ray = new Ray(rayPosition, rayDirection);
 
@@ -119,6 +114,11 @@ public class CopRole : NetworkBehaviour
                     _currentInteractable.Interact(this);
                     _currentInteractable = null;
                 }
+            }
+
+            if (data.button.IsSet(4))
+            {
+                RPC_ToggleFlashlight();
             }
         }
     }
@@ -174,8 +174,8 @@ public class CopRole : NetworkBehaviour
     {
         if(robber != null)
         {
-            float distance = Vector3.Distance(transform.position, robber.transform.position);
-            if(distance <= attackDistance)
+            float distance = Vector3.Distance(transform.position, robber.transform.position);   //transform.position은 클라에서 계산, 메모리 변조 시 알 방법이 없다. 
+            if(distance <= attackDistance)                                                      //서버에서 계산하도록 하는방법이 핵 방지엔 좋지만 서버 비용이 많이 나올 수 있다. 
             {
                 ExecuteArrest(robber);
             }

@@ -8,6 +8,8 @@ public class AIManager : NetworkBehaviour
 {
     public static AIManager Instance;
 
+    public List<CitizenAI> ActiveCitizens = new List<CitizenAI>();
+
     [SerializeField] private List<NetworkPrefabRef> AIPrefabs;
 
     [SerializeField] private int AICount = 10;
