@@ -25,12 +25,21 @@ public class CitizenAI : NetworkBehaviour
     [SerializeField] private float fleeDuration = 10.0f;
     [SerializeField] private float wanderRadius = 10.0f;
     
-    private float _stateTimer;
-    private float _patrolTimer;
-    private float _fleeTotalTimer;
     private int _searchCount = 5;
 
     private Vector3 _lastVisualPos;
+
+    private CitizenBaseState _currentStateObj; 
+    private readonly CitizenIdleState _idleState = new CitizenIdleState(); 
+    private readonly CitizenPatrolState _patrolState = new CitizenPatrolState(); 
+    private readonly CitizenFleeState _fleeState = new CitizenFleeState(); 
+
+    public NavMeshAgent Agent => _agent; 
+    public float WalkSpeed => walkSpeed; 
+    public float RunSpeed => runSpeed; 
+    public float IdleWaitTime => idleWaitTime; 
+    public float FleeWaitTime => fleeWaitTime; 
+    public float FleeDuration => fleeDuration;
 
     public override void Spawned()
     {
@@ -63,17 +72,9 @@ public class CitizenAI : NetworkBehaviour
             transform.rotation = Quaternion.LookRotation(_agent.velocity.normalized);
         }
 
-        switch (CurrentState)
+        if(_currentStateObj != null)
         {
-            case CitizenState.Idle:
-                UpdateIdle(dt);
-                break;
-            case CitizenState.Patrol:
-                UpdatePatrol(dt);
-                break;
-            case CitizenState.Flee:
-                UpdateFlee(dt);
-                break;
+            _currentStateObj.UpdateState(this, dt);
         }
     }
 
@@ -93,83 +94,31 @@ public class CitizenAI : NetworkBehaviour
         }
     }
 
-    private void ChangeState(CitizenState state)
+    public void ChangeState(CitizenState state)
     {
         CurrentState = state;
-        _stateTimer = 0f;
-        _patrolTimer = 0f;
+
+        if(_currentStateObj != null)
+        {
+            _currentStateObj.ExitState(this);
+        }
 
         switch (CurrentState)
         {
             case CitizenState.Idle:
-                _agent.isStopped = true;
+                _currentStateObj = _idleState;
                 break;
             case CitizenState.Patrol:
-                _agent.speed = walkSpeed;
-                _agent.isStopped = false;
-                SetRandomDestination();
+                _currentStateObj = _patrolState;
                 break;
             case CitizenState.Flee:
-                _agent.speed = runSpeed;
-                _agent.isStopped = false;
-                _fleeTotalTimer = 0f;
-                SetRandomDestination();
+                _currentStateObj = _fleeState;
                 break;
         }
-    }
 
-    private void UpdateIdle(float dt)
-    {
-        _stateTimer += dt;
-
-        if(_stateTimer >= idleWaitTime)
+        if(_currentStateObj != null)
         {
-            ChangeState(CitizenState.Patrol);
-        }
-    }
-
-    private void UpdatePatrol(float dt)
-    {
-        _patrolTimer += dt;
-        if (_patrolTimer >= 10f)
-        {
-            ChangeState(CitizenState.Idle);
-            return;
-        }
-
-        if (!_agent.pathPending)
-        {
-            if(_agent.pathStatus == NavMeshPathStatus.PathInvalid || _agent.pathStatus == NavMeshPathStatus.PathPartial)
-            {
-                ChangeState(CitizenState.Idle);
-                return;
-            }
-
-            if(_agent.remainingDistance <= _agent.stoppingDistance)
-            {
-                ChangeState(CitizenState.Idle);
-            }
-        }
-    }
-
-    private void UpdateFlee(float dt)
-    {
-        _fleeTotalTimer += dt;
-
-        if(_fleeTotalTimer >= fleeDuration)
-        {
-            ChangeState(CitizenState.Idle);
-            return;
-        }
-
-        if(!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance)
-        {
-            _stateTimer += dt;
-            if(_stateTimer >= fleeWaitTime)
-            {
-                SetRandomDestination();
-                _stateTimer = 0f;
-            }
+            _currentStateObj.EnterState(this);
         }
     }
 
@@ -186,7 +135,7 @@ public class CitizenAI : NetworkBehaviour
         }
     }
 
-    private void SetRandomDestination()
+    public void SetRandomDestination()
     {
         NavMeshHit hit;
 
