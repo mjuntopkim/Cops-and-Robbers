@@ -6,14 +6,15 @@ public class CitizenFleeState : CitizenBaseState
 {
     private float _fleeTotalTimer;
     private float _waitTimer;
+    private bool _isWaitingAtDestination;
 
     public override void EnterState(CitizenAI ai)
     {
         ai.Agent.speed = ai.RunSpeed;
-        ai.Agent.isStopped = false;
         ai.SetRandomDestination();
         _fleeTotalTimer = 0f;
         _waitTimer = 0f;
+        _isWaitingAtDestination = false;
     }
 
     public override void UpdateState(CitizenAI ai, float dt)
@@ -36,10 +37,5 @@ public class CitizenFleeState : CitizenBaseState
                 _waitTimer = 0f;
             }
         }
-    }
-
-    public override void ExitState(CitizenAI ai)
-    {
-        return;
     }
 }

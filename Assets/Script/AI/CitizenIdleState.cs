@@ -9,7 +9,6 @@ public class CitizenIdleState : CitizenBaseState
     {
         ai.Agent.isStopped = true;
         _timer = 0f;
-
     }
 
     public override void UpdateState(CitizenAI ai, float dt)
@@ -19,10 +18,5 @@ public class CitizenIdleState : CitizenBaseState
         {
             ai.ChangeState(CitizenAI.CitizenState.Patrol);
         }
-    }
-
-    public override void ExitState(CitizenAI ai)
-    {
-        return;
     }
 }

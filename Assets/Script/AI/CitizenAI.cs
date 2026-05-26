@@ -29,10 +29,10 @@ public class CitizenAI : NetworkBehaviour
 
     private Vector3 _lastVisualPos;
 
-    private CitizenBaseState _currentStateObj; 
-    private readonly CitizenIdleState _idleState = new CitizenIdleState(); 
-    private readonly CitizenPatrolState _patrolState = new CitizenPatrolState(); 
-    private readonly CitizenFleeState _fleeState = new CitizenFleeState(); 
+    private CitizenBaseState _currentStateObj;
+    private readonly CitizenIdleState _idleState = new CitizenIdleState();
+    private readonly CitizenMoveState _patrolState = new CitizenMoveState(new CitizenPatrolState());
+    private readonly CitizenMoveState _fleeState = new CitizenMoveState(new CitizenFleeState());
 
     public NavMeshAgent Agent => _agent; 
     public float WalkSpeed => walkSpeed; 

@@ -9,7 +9,6 @@ public class CitizenPatrolState : CitizenBaseState
     public override void EnterState(CitizenAI ai)
     {
         ai.Agent.speed = ai.WalkSpeed;
-        ai.Agent.isStopped = false;
         ai.SetRandomDestination();
         _patrolTimer = 0f;
     }
@@ -26,20 +25,10 @@ public class CitizenPatrolState : CitizenBaseState
 
         if (!ai.Agent.pathPending)
         {
-            if(ai.Agent.pathStatus == NavMeshPathStatus.PathInvalid || ai.Agent.pathStatus == NavMeshPathStatus.PathPartial)
-            {
-                ai.ChangeState(CitizenAI.CitizenState.Idle);
-                return;
-            }
             if(ai.Agent.remainingDistance <= ai.Agent.stoppingDistance)
             {
                 ai.ChangeState(CitizenAI.CitizenState.Idle);
             }
         }
-    }
-
-    public override void ExitState(CitizenAI ai)
-    {
-        return;
     }
 }

@@ -629,7 +629,7 @@ MonoBehaviour:
   walkSpeed: 6
   runSpeed: 10
   idleWaitTime: 3
-  fleeWaitTime: 1
+  fleeWaitTime: 0.5
   fleeDuration: 10
   wanderRadius: 10
 --- !u!114 &277112703737036507
